@@ -9,9 +9,14 @@ import htmlparser
 import threading
 import sys
 
+FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'
+FAKEBOOK_LANDING_URL = ''
+SET_FRONTIER = set()
+SET_FRIEND = set()
+LIST_FLAG = []
+
 
 def getopts(argv):
-    # TODO
     pass
 
 
@@ -91,15 +96,11 @@ def create_fb_absolute_url(friend_rel_url):
 
 
 def main():
-    lock = threading.Lock
-    list_frontier = []
-    list_flags = []
-    set_users = set()
+    # lock = threading.Lock
+    # list_frontier = []
+    # list_flags = []
+    # set_users = set()
     my_args = getopts(sys.argv)
-
-
-def is_5(x):
-    return x == 5
 
 
 if __name__ == "__main":
