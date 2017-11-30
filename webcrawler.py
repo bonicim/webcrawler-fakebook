@@ -23,7 +23,11 @@ def main():
     my_args = getopts(sys.argv)
 
 
-if __name__ =="__main":
+def is_5(x):
+    return x == 5
+
+
+if __name__ == "__main":
     main()
 
 
