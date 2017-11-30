@@ -14,7 +14,7 @@ class WebcrawlerTestCase(unittest.TestCase):
 
     # TODO Write tests
     def test_getopts_returns_username_password(self):
-        """Is username and password retrieved?"""
+        """Is a diciontary containing username and password retrieved?"""
         pass
 
     def test_getopts_returns_error(self):

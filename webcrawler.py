@@ -17,6 +17,7 @@ LIST_FLAG = []
 
 
 def getopts(argv):
+    """Returns a dictionary of 2 key value pairs. username and password."""
     pass
 
 
