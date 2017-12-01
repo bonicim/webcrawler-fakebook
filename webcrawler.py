@@ -17,8 +17,15 @@ LIST_FLAG = []
 
 
 def getopts(argv):
-    """Returns a dictionary of 2 key value pairs. username and password."""
-    pass
+    """Returns a list of 2 strings--username and password--in that order."""
+    opts = []  # Empty dictionary to store key-value pairs.
+    if len(argv) == 3:
+        for arg in argv[1:]:
+            opts.append(arg)
+    else:
+        print("Only enter exactly 2 arguments: username and password. Retry.")
+        sys.exit()
+    return opts
 
 
 def login_fakebook(username, password):
@@ -101,7 +108,8 @@ def main():
     # list_frontier = []
     # list_flags = []
     # set_users = set()
-    my_args = getopts(sys.argv)
+    # my_args = getopts(sys.argv)
+    pass
 
 
 if __name__ == "__main":
