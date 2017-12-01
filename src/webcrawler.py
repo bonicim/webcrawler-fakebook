@@ -1,12 +1,3 @@
-import socket
-import urllib.request
-import urllib.parse
-import html.parser
-import http.cookies
-import http.cookiejar
-import time
-import htmlparser
-import threading
 import sys
 
 FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'

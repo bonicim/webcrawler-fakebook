@@ -1,27 +1,21 @@
 import unittest
-import webcrawler
 import pytest
+import src.webcrawler
+import tests.test_const
 
 
 class WebcrawlerTestCase(unittest.TestCase):
     """ Tests for webcrawler.py.
     All functions beginning with test will be run when unittest.main() is called. """
 
-    USERNAME = 'bonicillo.m'
-    PASSWORD = 'toast'
-    REL_FRIEND_URL = ''
-    FRIEND_URL = ''
-    FRIEND_PAGE_URL = ''
-    ARGV = ['webcrawler', USERNAME, PASSWORD]
-
     def test_getopts_returns_username_password(self):
         """Is a list containing username and password retrieved?"""
-        assert webcrawler.getopts(WebcrawlerTestCase.ARGV) == ['bonicillo.m', 'toast']
+        assert src.webcrawler.getopts(tests.test_const.ARGV) == ['bonicillo.m', 'toast']
 
     def test_getopts_returns_error(self):
         """Does error get returned if 0, 1, or 3 more arguments are given?"""
         with self.assertRaises(SystemExit):
-            webcrawler.getopts(['toast'])
+            src.webcrawler.getopts(['toast'])
 
     def test_login_fakebook_success(self):
         """Does a valid user's fakebook profile get returned?"""
