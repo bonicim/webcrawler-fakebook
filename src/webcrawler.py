@@ -41,7 +41,7 @@ def parse_flags_friends_nextpage(fb_lpage_html):
     """Parses a fakebook member's landing page for secret flags, friends, and a next page link
     Returns a dictionary consisting of the following key value pairs:
     'flag': [str_flag]
-    'friends': [friend_rel_url]
+    'friend': [friend_rel_url]
      'next_page': [next_page_url]"""
     pass
 

@@ -2,6 +2,7 @@ import unittest
 import pytest
 import src.webcrawler
 import tests.test_const
+import urllib.request
 
 
 class WebcrawlerTestCase(unittest.TestCase):
@@ -41,36 +42,42 @@ class WebcrawlerTestCase(unittest.TestCase):
         """Does an error page for an invalid view friends url get returned?"""
         pytest.skip()
 
-    def test_parse_flags_friends_nextpage_success(self):
-        """Does a dictionary containing 3 key value pairs get returned?"""
-        pytest.skip()
-
-    def test_parse_flags_friends_nextpage_no_next(self):
+    def test_parse_flags_friends_my_fb_page(self):
         """Does a dictionary containing 3 key value pairs in which the next_page key has
         an empty list get returned?"""
-        pytest.skip()
+        dict_ret = src.webcrawler.parse_flags_friends_nextpage(tests.test_const.MEMBER_LP_HTML)
+        assert len(dict_ret['next_page']) == 0
+        assert len(dict_ret['friend']) == 10
+        assert len(dict_ret['flag']) == 0
 
-    def test_parse_flags_friends_nextpage_no_flag(self):
+    def test_parse_flags_friends_nextpage_friend(self):
+        """Does a dictionary containing 3 key value pairs get returned?"""
+        dict_ret = src.webcrawler.parse_flags_friends_nextpage(tests.test_const.FRIEND_LP_HTML)
+        for list_el in dict_ret:
+            assert len(list_el) == 0
+
+    def test_parse_flags_friends_viewing_friends_html(self):
         """Does a dictionary containing 3 key value pairs in which the flags key has
         an empty list get returned?"""
-        pytest.skip()
-
-    def test_parse_flags_friends_nextpage_no_friends(self):
-        """Does a dictionary containing 3 key value pairs in which the friends key has
-        an empty list get returned?"""
-        pytest.skip()
+        dict_ret = src.webcrawler.parse_flags_friends_nextpage(tests.test_const.VIEWING_FRIENDS_HTML)
+        assert len(dict_ret['flag']) == 0
+        assert len(dict_ret['friend']) == 20
+        assert len(dict_ret['flag']) == 0
 
     def test_create_get_req_friend_url_success(self):
-        """Is a Request object created given a valid url?"""
-        pytest.skip()
+        """Is a GET Request object created given a valid url?"""
+        self.assertIsInstance(src.webcrawler.create_get_req(tests.test_const.FRIEND_HOME_URL),
+                              urllib.request.Request)
 
     def test_create_post_req_fb_login_success(self):
-        """Is a Post object created given a valid url?"""
-        pytest.skip()
+        """Is a POST Request object created given a valid url?"""
+        self.assertIsInstance(src.webcrawler.create_post_req(tests.test_const.FRIEND_HOME_URL, tests.test_const.LOGIN_DATA),
+                              urllib.request.Request)
 
     def test_create_fb_absolute_url_success(self):
         """Is an absolute FB url created given a relative friend url?"""
-        pytest.skip()
+        assert src.webcrawler.create_fb_absolute_url('/fakebook/50644342/') == \
+               tests.test_const.FB_URL_PREFIX + '/fakebook/50644342/'
 
 
 if __name__ == '__main__':
