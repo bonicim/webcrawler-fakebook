@@ -13,14 +13,6 @@ LOGIN_DATA = urllib.parse.urlencode(
      'password': PASSWORD,
      'next': '/fakebook/',
      'csrfmiddlewaretoken': 'foobar'})
-# My landing page html
-MEMBER_LP_HTML = r'''
-<html><head><title>Fakebook</title><style TYPE="text/css"><!--
-#pagelist li { display: inline; padding-right: 10px; }
---></style></head><body><h1>Fakebook</h1><p><a href="/fakebook/">Home</a></p><hr/><h1>Welcome to Fakebook</h1><p>Get started by browsing some random people's profiles!</p><ul><li><a href="/fakebook/996350946/">Pube Bregel</a></li><li><a href="/fakebook/996460889/">Pugidotu Vuvot</a></li><li><a href="/fakebook/996604893/">Ali Transou</a></li><li><a href="/fakebook/996793509/">Edmundo Gresl</a></li><li><a href="/fakebook/997083323/">Hosea Gandarillia</a></li><li><a href="/fakebook/997892294/">Candie Bookmiller</a></li><li><a href="/fakebook/998156234/">Ezequiel Bossardet</a></li><li><a href="/fakebook/998192170/">Tia Linney</a></li><li><a href="/fakebook/998640929/">Jewell Latos</a></li><li><a href="/fakebook/999148512/">Rosamunde Crucass</a></li></ul><h6>Fakebook is run by <a href="http://www.ccs.neu.edu/home/choffnes/">David Choffnes</a> at                        
-<a href="http://www.northeastern.edu">NEU</a>. It is meant for educational purposes only.                       
-For questions, contact <a href="mailto:choffnes@ccs.neu.edu">David Choffnes</a></h6></body></html>
-'''
 # Pollock's Landing page
 FRIEND_LP_HTML = r'''
 <html><head><title>Fakebook</title><style TYPE="text/css"><!--
