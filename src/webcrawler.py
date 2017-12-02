@@ -1,10 +1,16 @@
 import sys
+import urllib.request
+import urllib.parse
+import re
+import http.cookiejar
+import src.htmlparser
 
 FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'
-FAKEBOOK_LANDING_URL = ''
+FAKEBOOK_DOMAIN_URL = 'http://cs5700sp15.ccs.neu.edu'
 SET_FRONTIER = set()
 SET_FRIEND = set()
 LIST_FLAG = []
+NEXT_VAL = '/fakebook/'
 
 
 def getopts(argv):
@@ -19,11 +25,15 @@ def getopts(argv):
     return opts
 
 
-def login_fakebook(username, password):
+def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_URL):
     """Logs into http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/ with 'username' and 'password'
     Returns a String html landing page of the user's account."""
-    pass
-
+    values = {'username': username, 'password': password, 'next': NEXT_VAL, 'csrfmiddlewaretoken': csrf_token}
+    data = urllib.parse.urlencode(values)
+    data = data.encode()
+    resp = opener.open(url, data)
+    resp = resp.read().decode()
+    return resp
 
 def open_friend_page(friend_url):
     """Opens fakebook friend page given a 'friend_url'.
@@ -43,9 +53,25 @@ def parse_flags_friends_nextpage(fb_lpage_html):
     'flag': [str_flag]
     'friend': [friend_rel_url]
      'next_page': [next_page_url]"""
-    pass
+    dict_ret = {}
+    dict_ret['flag'] = parse_flag(fb_lpage_html)
+    dict_ret['friend'] = parse_friend(fb_lpage_html)
+    dict_ret['next_page'] = parse_next_page(fb_lpage_html)
+    return dict_ret
 
 # Helpers
+
+
+def parse_flag(fb_lpage_html):
+    return []
+
+
+def parse_friend(fb_lpage_html):
+    return []
+
+
+def parse_next_page(fb_lpage_html):
+    return re.findall(r'<ul id="pagelist">(.*?)</ul', fb_lpage_html)
 
 
 def add_secret_flag(new_flag, collection_flag):
@@ -76,25 +102,45 @@ def remove_friend_to_frontier(collection_frontier):
 
 def create_get_req(url):
     """Returns a GET Request object given a String url."""
-    pass
+    return urllib.request.Request(url)
 
 
 def create_post_req(url, data):
-    """Returns a POST Request object given a String url and Bytes data."""
-    pass
+    """Returns a POST Request object given a String url and Bytes data.
+    Does not validate arguments."""
+    return urllib.request.Request(url, data)
 
 
 def create_fb_absolute_url(friend_rel_url):
     """Returns an absolute url based on Fakebook domain and relative domain of a Fakebook member.
-    The relative url must be in the form: /fakebook/<uniqueID>/
+    The relative url MUST be in the form: /fakebook/<uniqueID>/
+    (where uniqueID is the unique ID of a Fakebook user)
     The Fakebook domain used is http://cs5700sp15.ccs.neu.edu/
 
     For example, given relative url /fakebook/50644342/, the absolute url will be:
     http://cs5700sp15.ccs.neu.edu/fakebook/50644342/"""
+    return FAKEBOOK_DOMAIN_URL + friend_rel_url
+
+
+def parse_token(html_page):
+    """Gets csrf token from a Fakebook login page"""
+    # TODO parse the token from response in the form and set it to csrf_token
+    # this is where you use HTML parser
+    parser = src.htmlparser.HTMLParser()
+    parser.feed(html_page)
     pass
 
 
 def main():
+    opts = getopts(sys.argv)
+    cj = http.cookiejar.CookieJar()
+    cjhandler = urllib.request.HTTPCookieProcessor(cj)
+    opener = urllib.request.build_opener(cjhandler)
+    resp = opener.open(FAKEBOOK_LOGIN_URL)
+    html_page = resp.read().decode()
+    csrf_token = parse_token(html_page)
+    member_page_html = login_fakebook(csrf_token, opener, opts[0], opts[1])
+    print(member_page_html)
     # lock = threading.Lock
     # list_frontier = []
     # list_flags = []
