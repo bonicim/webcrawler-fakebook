@@ -3,13 +3,10 @@ import urllib.request
 import urllib.parse
 import re
 import http.cookiejar
-import src.htmlparser
+import src.my_htmlparser
 
 FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'
 FAKEBOOK_DOMAIN_URL = 'http://cs5700sp15.ccs.neu.edu'
-SET_FRONTIER = set()
-SET_FRIEND = set()
-LIST_FLAG = []
 NEXT_VAL = '/fakebook/'
 
 
@@ -34,6 +31,7 @@ def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_UR
     resp = opener.open(url, data)
     resp = resp.read().decode()
     return resp
+
 
 def open_friend_page(friend_url):
     """Opens fakebook friend page given a 'friend_url'.
@@ -122,31 +120,46 @@ def create_fb_absolute_url(friend_rel_url):
     return FAKEBOOK_DOMAIN_URL + friend_rel_url
 
 
-def parse_token(html_page):
+def parse_token(html_page, parser):
     """Gets csrf token from a Fakebook login page"""
-    # TODO parse the token from response in the form and set it to csrf_token
     # this is where you use HTML parser
-    parser = src.htmlparser.HTMLParser()
     parser.feed(html_page)
-    pass
+    links = parser.links
+    csrf_dict = parser.links['csrf']
+    for key in csrf_dict:
+        if key == 'value':
+            return csrf_dict[key]
+    print("FAILURE. We should have parsed csrf token.")
+
+
+def init_html_parser():
+    parser = src.my_htmlparser.MyHTMLParser()
+    parser.links = {} # we are adding an attribute to the HTMLParser class
+    return parser
 
 
 def main():
+    # Login to the Fakebook
     opts = getopts(sys.argv)
     cj = http.cookiejar.CookieJar()
     cjhandler = urllib.request.HTTPCookieProcessor(cj)
     opener = urllib.request.build_opener(cjhandler)
     resp = opener.open(FAKEBOOK_LOGIN_URL)
+
     html_page = resp.read().decode()
-    csrf_token = parse_token(html_page)
-    member_page_html = login_fakebook(csrf_token, opener, opts[0], opts[1])
-    print(member_page_html)
-    # lock = threading.Lock
+
+    # setup parser
+    parser = init_html_parser()
+    csrf_token = parse_token(html_page, parser)
+    # member_page_html = login_fakebook(csrf_token, opener, opts[0], opts[1])
+    # print(member_page_html)
+
+    # Access a Friends page and scrape
     # list_frontier = []
     # list_flags = []
     # set_users = set()
-    # my_args = getopts(sys.argv)
-    pass
+
+    # Finish scraping the site and print the results
 
 
 if __name__ == "__main":
