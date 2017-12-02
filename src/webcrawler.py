@@ -10,29 +10,6 @@ FAKEBOOK_DOMAIN_URL = 'http://cs5700sp15.ccs.neu.edu'
 NEXT_VAL = '/fakebook/'
 
 
-def getopts(argv):
-    """Returns a list of 2 strings--username and password--in that order."""
-    opts = []  # Empty dictionary to store key-value pairs.
-    if len(argv) == 3:
-        for arg in argv[1:]:
-            opts.append(arg)
-    else:
-        print("Only enter exactly 2 arguments: username and password. Retry.")
-        sys.exit()
-    return opts
-
-
-def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_URL):
-    """Logs into http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/ with 'username' and 'password'
-    Returns a String html landing page of the user's account."""
-    values = {'username': username, 'password': password, 'next': NEXT_VAL, 'csrfmiddlewaretoken': csrf_token}
-    data = urllib.parse.urlencode(values)
-    data = data.encode()
-    resp = opener.open(url, data)
-    resp = resp.read().decode()
-    return resp
-
-
 def open_friend_page(friend_url):
     """Opens fakebook friend page given a 'friend_url'.
     Returns a String html landing page of the friend's fakebook profile."""
@@ -120,9 +97,41 @@ def create_fb_absolute_url(friend_rel_url):
     return FAKEBOOK_DOMAIN_URL + friend_rel_url
 
 
+def getopts(argv):
+    """Returns a list of 2 strings--username and password--in that order."""
+    opts = []  # Empty dictionary to store key-value pairs.
+    if len(argv) == 3:
+        for arg in argv[1:]:
+            opts.append(arg)
+    else:
+        print("Only enter exactly 2 arguments: username and password. Retry.")
+        sys.exit()
+    return opts
+
+
+def init_cookiejar():
+    cj = http.cookiejar.CookieJar()
+    return urllib.request.HTTPCookieProcessor(cj)
+
+
+def build_custom_opener(cookiejar):
+    return urllib.request.build_opener(cookiejar)
+
+
+def init_html_parser():
+    parser = src.my_htmlparser.MyHTMLParser()
+    parser.links = {}  # we are adding an attribute to the HTMLParser class
+    return parser
+
+
+def get_csrf_token_fakebook(opener, parser):
+    resp_login_page = opener.open(FAKEBOOK_LOGIN_URL)
+    html_login = resp_login_page.read().decode()
+    return parse_token(html_login, parser)
+
+
 def parse_token(html_page, parser):
     """Gets csrf token from a Fakebook login page"""
-    # this is where you use HTML parser
     parser.feed(html_page)
     links = parser.links
     csrf_dict = parser.links['csrf']
@@ -132,32 +141,40 @@ def parse_token(html_page, parser):
     print("FAILURE. We should have parsed csrf token.")
 
 
-def init_html_parser():
-    parser = src.my_htmlparser.MyHTMLParser()
-    parser.links = {} # we are adding an attribute to the HTMLParser class
-    return parser
+def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_URL):
+    """Logs into http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/ with 'username' and 'password'
+    Returns a String html landing page of the user's account."""
+    values = {'username': username, 'password': password, 'next': NEXT_VAL, 'csrfmiddlewaretoken': csrf_token}
+    data = urllib.parse.urlencode(values).encode()
+    return opener.open(url, data).read().decode()
 
 
 def main():
-    # Login to the Fakebook
-    opts = getopts(sys.argv)
-    cj = http.cookiejar.CookieJar()
-    cjhandler = urllib.request.HTTPCookieProcessor(cj)
-    opener = urllib.request.build_opener(cjhandler)
-    resp = opener.open(FAKEBOOK_LOGIN_URL)
-
-    html_page = resp.read().decode()
-
-    # setup parser
-    parser = init_html_parser()
-    csrf_token = parse_token(html_page, parser)
-    # member_page_html = login_fakebook(csrf_token, opener, opts[0], opts[1])
-    # print(member_page_html)
-
-    # Access a Friends page and scrape
+    # Accumulators
     # list_frontier = []
     # list_flags = []
     # set_users = set()
+
+    # Setup opener to access internet
+    opts = getopts(sys.argv)
+    cookiejar = init_cookiejar()
+    opener = build_custom_opener(cookiejar)
+
+    # Setup parser to parse html pages
+    parser = init_html_parser()
+
+    # Get csrf token
+    csrf_token = get_csrf_token_fakebook(opener, parser)
+
+    # Login to Fakebook, parse for targets
+    # links of friends, search for flags, and the next friends or link to list of friends
+    html_login = login_fakebook(csrf_token, opener, opts[0], opts[1])
+    print(html_login)
+    dict_tgts = parse_flags_friends_nextpage(html_login)
+    for key in dict_tgts:
+        print("Key: ", key, " Value: ", dict_tgts[key])
+
+    # Access a Friends page and scrape
 
     # Finish scraping the site and print the results
 
