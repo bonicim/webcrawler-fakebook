@@ -22,30 +22,31 @@ def open_view_friends_page(friend_page_url):
     pass
 
 
-def parse_flags_friends_nextpage(fb_lpage_html):
+def parse_flags_friends_nextpage(fb_lpage_html, parser):
     """Parses a fakebook member's landing page for secret flags, friends, and a next page link
     Returns a dictionary consisting of the following key value pairs:
     'flag': [str_flag]
     'friend': [friend_rel_url]
      'next_page': [next_page_url]"""
+    # TODO
     dict_ret = {}
-    dict_ret['flag'] = parse_flag(fb_lpage_html)
-    dict_ret['friend'] = parse_friend(fb_lpage_html)
-    dict_ret['next_page'] = parse_next_page(fb_lpage_html)
+    dict_ret['flag'] = parse_flag(fb_lpage_html, parser)
+    dict_ret['friend'] = parse_friend(fb_lpage_html, parser)
+    dict_ret['next_page'] = parse_next_page(fb_lpage_html, parser)
     return dict_ret
 
 # Helpers
 
 
-def parse_flag(fb_lpage_html):
+def parse_flag(fb_lpage_html, parser):
     return []
 
 
-def parse_friend(fb_lpage_html):
+def parse_friend(fb_lpage_html, parser):
     return []
 
 
-def parse_next_page(fb_lpage_html):
+def parse_next_page(fb_lpage_html, parser):
     return re.findall(r'<ul id="pagelist">(.*?)</ul', fb_lpage_html)
 
 
@@ -161,7 +162,7 @@ def main():
     opener = build_custom_opener(cookiejar)
 
     # Setup parser to parse html pages
-    parser = init_html_parser()
+    parser = init_html_parser() # Really bad design choice, implementation coupled with this parser
 
     # Get csrf token
     csrf_token = get_csrf_token_fakebook(opener, parser)
@@ -170,7 +171,7 @@ def main():
     # links of friends, search for flags, and the next friends or link to list of friends
     html_login = login_fakebook(csrf_token, opener, opts[0], opts[1])
     print(html_login)
-    dict_tgts = parse_flags_friends_nextpage(html_login)
+    dict_tgts = parse_flags_friends_nextpage(html_login, parser)
     for key in dict_tgts:
         print("Key: ", key, " Value: ", dict_tgts[key])
 
