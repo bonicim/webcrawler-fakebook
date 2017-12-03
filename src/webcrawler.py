@@ -39,7 +39,12 @@ def parse_flags_friends_nextpage(fb_lpage_html, parser):
 
 
 def parse_flag(fb_lpage_html, parser):
-    return []
+    parser.feed(fb_lpage_html)
+    data = parser.data_actual
+    # check for the FLAG: prefix
+    flag = [el for el in data if 'FLAG:' in el]
+    # TODO add more rigorous check for actual flag
+    return list(flag)
 
 
 def parse_friend(fb_lpage_html, parser):
@@ -122,6 +127,7 @@ def build_custom_opener(cookiejar):
 def init_html_parser():
     parser = src.my_htmlparser.MyHTMLParser()
     parser.links = {}  # we are adding an attribute to the HTMLParser class
+    parser.data_actual = []
     return parser
 
 
