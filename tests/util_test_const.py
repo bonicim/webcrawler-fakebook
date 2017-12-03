@@ -13,6 +13,9 @@ LOGIN_DATA = urllib.parse.urlencode(
      'password': PASSWORD,
      'next': '/fakebook/',
      'csrfmiddlewaretoken': 'foobar'})
+
+
+
 # Pollock's Landing page
 FRIEND_LP_HTML = r'''
 <html><head><title>Fakebook</title><style TYPE="text/css"><!--

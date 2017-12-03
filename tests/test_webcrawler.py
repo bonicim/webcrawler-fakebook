@@ -4,6 +4,7 @@ import src.webcrawler
 import tests.util_test_const
 import urllib.request
 import tests.util_test_html
+import src.my_htmlparser
 
 
 class WebcrawlerTestCase(unittest.TestCase):
@@ -42,6 +43,18 @@ class WebcrawlerTestCase(unittest.TestCase):
     def test_open_view_friends_page_failure(self):
         """Does an error page for an invalid view friends url get returned?"""
         pytest.skip()
+
+    def test_parse_flag_where_flag_present(self):
+        """Does a list of one flag get returned?"""
+        parser = src.my_htmlparser.MyHTMLParser()
+        parser.links = {}  # we are adding an attribute to the HTMLParser class
+        parser.data_actual = []
+        html = tests.util_test_html.FLAG_HTML
+        dict_ret = src.webcrawler.parse_flag(html, parser)
+        flag_list = dict_ret['flag']
+        self.assertIsNotNone(flag_list)
+        for flag in flag_list:
+            assert len(flag) == 64
 
     def test_parse_flags_friends_my_fb_page(self):
         """Does a dictionary containing 3 key value pairs in which the next_page key has
