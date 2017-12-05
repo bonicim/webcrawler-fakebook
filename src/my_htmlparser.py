@@ -8,6 +8,7 @@ class MyHTMLParser(HTMLParser):
         self.__secret_flags = ()
         self.__data_actual = []
         self.__frozendata = ()
+        self.__friends = ()
 
     def csrf_token(self):
         return self.__csrf_token
@@ -15,13 +16,22 @@ class MyHTMLParser(HTMLParser):
     def secret_flags(self):
         return tuple(filter(lambda data: 'FLAG' in data, self.__frozendata))
 
+    def friends(self):
+        return self.__friends
+
     def feed(self, data):
+        self.flush_accumulators()
         super().feed(data)
         self.__frozendata = tuple(copy.deepcopy(self.__data_actual))
-        self.__data_actual.clear()
 
-    def add_flag(self, set_flag, flag):
-        return set_flag.union(flag)
+    def flush_accumulators(self):
+        self.__csrf_token = ()
+        self.__secret_flags = ()
+        self.__data_actual.clear()
+        self.__friends = ()
+
+    def handle_data(self, data):
+        self.__data_actual.append(data)
 
     def handle_startendtag(self, tag, attrs):
         if tag != 'input':
@@ -37,10 +47,7 @@ class MyHTMLParser(HTMLParser):
         if tag == 'h2':
             self.parse_secret_flag(attrs)
         elif tag == 'a':
-            self.handle_friend_url(attrs)
-
-    def handle_data(self, data):
-        self.__data_actual.append(data)
+            self.parse_friend_url(attrs)
 
     def parse_secret_flag(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for a tag
@@ -54,14 +61,15 @@ class MyHTMLParser(HTMLParser):
         return ('class' in attr and attr['class'] == 'secret flag') and \
                ('style' in attr and attr['style'] == 'color:red')
 
-    def handle_friend_url(self, attrs):
-        attr = dict(attrs)  # a dictionary of name value pairs for an 'a' tag with one href pair
-        if len(attr) != 1:
+    def parse_friend_url(self, attrs):
+        attr = dict(attrs)  # a dictionary of name value pairs for an 'a' tag
+        if len(attr) != 1:  # a tags that we care about should only have one name value pair
             return
-        if 'href' in attr and attr['href'].startswith('/fakebook/'):
-            self.links.append(('href_friend_url', attr['href']))
-            self.links['friend'] = attr
-            # grab the value from the dictionary and append something to it, then update it again
-            # do the same for flags
-        else:
-            return
+        if self.is_href_fakebook_friend_url(attr):
+            self.__friends = self.__friends + (attr['href'],)
+
+    def is_href_fakebook_friend_url(self, attr):
+        return 'href' in attr and \
+               attr['href'].startswith('/fakebook/') and \
+               len(attr['href']) > 10 and \
+               'friends' not in attr['href']

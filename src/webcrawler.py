@@ -47,8 +47,7 @@ def parse_flag(fb_lpage_html, parser):
 
 def parse_friend(fb_lpage_html, parser):
     parser.feed(fb_lpage_html)
-    # get name value pairs
-    return None
+    return parser.friends()
 
 
 def parse_next_page(fb_lpage_html, parser):

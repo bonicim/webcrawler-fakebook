@@ -80,27 +80,27 @@ class WebcrawlerTestCase(unittest.TestCase):
 
     def test_parse_friend_where_friends_present(self):
         """Does a list of friend url's get returned?"""
-        list_friend_url = \
+        tup_friend_url = \
             src.webcrawler.parse_friend(tests.util_test_html.MEMBER_LANDING_HTML, tests.util_test.init_parser())
-        self.assertIsNotNone(list_friend_url)
-        assert len(list_friend_url) == 10
-        assert '/fakebook/190909169/' in list_friend_url
-        list_friend_url = \
+        self.assertIsNotNone(tup_friend_url)
+        assert len(tup_friend_url) == 10
+        assert '/fakebook/190909169/' in tup_friend_url
+        tup_friend_url = \
             src.webcrawler.parse_friend(tests.util_test_html.FRIEND_VIEWING_FRIENDS_HTML, tests.util_test.init_parser())
-        self.assertIsNotNone(list_friend_url)
-        assert len(list_friend_url) > 0
-        assert '/fakebook/89081356/' in list_friend_url
+        self.assertIsNotNone(tup_friend_url)
+        assert len(tup_friend_url) > 0
+        assert '/fakebook/89081356/' in tup_friend_url
 
-    def test_parse_friend_where_friends_absent(self):
+    def test_parse_friend_where_no_friends_except_user(self):
         """Does an empty list get returned?"""
-        list_friend_url = \
+        tup_friend_url = \
             src.webcrawler.parse_friend(tests.util_test_html.FRIEND_LANDING_HTML, tests.util_test.init_parser())
-        self.assertIsNotNone(list_friend_url)
-        assert len(list_friend_url) == 0
-        list_friend_url = \
+        self.assertIsNotNone(tup_friend_url)
+        assert len(tup_friend_url) == 1
+        tup_friend_url = \
             src.webcrawler.parse_friend(tests.util_test_html.FAKEBOOK_LOGIN_HTML, tests.util_test.init_parser())
-        self.assertIsNotNone(list_friend_url)
-        assert len(list_friend_url) == 0
+        self.assertIsNotNone(tup_friend_url)
+        assert len(tup_friend_url) == 0
 
     def test_parse_flags_friends_my_fb_page(self):
         """Does a dictionary containing 3 key value pairs in which the next_page key has
