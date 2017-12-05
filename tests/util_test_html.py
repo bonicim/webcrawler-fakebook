@@ -68,6 +68,17 @@ FRIEND_VIEWING_FRIENDS_HTML = '''
 <a href="http://www.northeastern.edu">NEU</a>. It is meant for educational purposes only.                       
 For questions, contact <a href="mailto:choffnes@ccs.neu.edu">David Choffnes</a></h6></body></html>
 '''
+FRIEND_VIEWING_FRIENDS_LAST_PAGE_HTML = '''
+<html><head><title>Fakebook</title><style TYPE="text/css"><!--
+#pagelist li { display: inline; padding-right: 10px; }
+--></style></head><body><h1>Fakebook</h1><p><a href="/fakebook/">Home</a></p><hr/><h1>Viewing <a href="/fakebook/996350946/">Pube Bregel</a>'s Friends</h1><ul><li><a href="/fakebook/517522361/">Patrina Losano</a></li><li><a href="/fakebook/535559461/">Vivetoxe Mukherjee</a></li><li><a href="/fakebook/569454833/">Duzo Frankel</a></li><li><a href="/fakebook/571162886/">Christian Luft</a></li><li><a href="/fakebook/571902974/">Bryon Bergo</a></li><li><a href="/fakebook/613597456/">Chinua Ard</a></li><li><a href="/fakebook/682737904/">Nak Treloll</a></li><li><a href="/fakebook/784265252/">Stefanie Vifoll</a></li><li><a href="/fakebook/841125873/">Zapopu Weis</a></li><li><a href="/fakebook/842182455/">Lojevojaja Brelap</a></li><li><a href="/fakebook/862994592/">Rae Creegan</a></li><li><a href="/fakebook/863084153/">Rurucotota Gebic</a></li><li><a href="/fakebook/885069463/">Dazudamo Litek</a></li><li><a href="/fakebook/911033743/">Jinoxu Pluhiss</a></li></ul><p>Page 2 of 2
+<ul id="pagelist"><li><a href="/fakebook/996350946/friends/1/">first</a></li><li><a href="/fakebook/996350946/friends/1/">prev</a></li><li><a href="/fakebook/996350946/friends/1/">1</a></li><li>
+2 
+
+</li></ul></p><h6>Fakebook is run by <a href="http://www.ccs.neu.edu/home/choffnes/">David Choffnes</a> at                        
+<a href="http://www.northeastern.edu">NEU</a>. It is meant for educational purposes only.                       
+For questions, contact <a href="mailto:choffnes@ccs.neu.edu">David Choffnes</a></h6></body></html>
+'''
 FLAG_HTML = r'''<p>foobar</p>
 <h2 class="secret flag" style="color:red">FLAG: FB494811FFA433A2C36BFFEB3242C955113D38E95FA3101FE41A9EA586A4BF74</h2'''
 MEMBER_LANDING_YES_FLAG_HTML = MEMBER_LANDING_HTML + FLAG_HTML

@@ -102,30 +102,38 @@ class WebcrawlerTestCase(unittest.TestCase):
         self.assertIsNotNone(tup_friend_url)
         assert len(tup_friend_url) == 0
 
-    def test_parse_flags_friends_my_fb_page(self):
+    def test_parse_next_page_where_next_exists(self):
         """Does a dictionary containing 3 key value pairs in which the next_page key has
         an empty list get returned?"""
-        pytest.skip()
-        # dict_ret = src.webcrawler.parse_flags_friends_nextpage(tests.util_test_html.MEMBER_LANDING_HTML)
-        # assert len(dict_ret['next_page']) == 0
-        # assert len(dict_ret['friend']) == 10
-        # assert len(dict_ret['flag']) == 0
+        # Case 1: Friend viewing friends page
+        tup_next_page = \
+            src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_VIEWING_FRIENDS_HTML,
+                                           tests.util_test.init_parser())
+        self.assertIsNotNone(tup_next_page)
+        assert len(tup_next_page) > len('/fakebook/996350946/')
+        assert tup_next_page[0] == '/fakebook/996350946/friends/2/'
 
-    def test_parse_flags_friends_nextpage_friend(self):
+        # Case 2: Landing page of friend where the next page must be the first page
+        tup_next_page = \
+            src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_LANDING_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(tup_next_page)
+        assert len(tup_next_page) > len('/fakebook/996350946/')
+        assert tup_next_page[0] == '/fakebook/996350946/friends/1/'
+
+    def test_parse_next_page_where_next_absent(self):
         """Does a dictionary containing 3 key value pairs get returned?"""
-        pytest.skip()
-        # dict_ret = src.webcrawler.parse_flags_friends_nextpage(tests.util_test_const.FRIEND_LP_HTML)
-        # for list_el in dict_ret:
-        #     assert len(list_el) == 0
+        # Case 1: My Landing page has no next links because I have few friends
+        tup_next_page = \
+            src.webcrawler.parse_next_page(tests.util_test_html.MEMBER_LANDING_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(tup_next_page)
+        assert len(tup_next_page) == 0
 
-    def test_parse_flags_friends_viewing_friends_html(self):
-        """Does a dictionary containing 3 key value pairs in which the flags key has
-        an empty list get returned?"""
-        pytest.skip()
-        # dict_ret = src.webcrawler.parse_flags_friends_nextpage(tests.util_test_const.VIEWING_FRIENDS_HTML)
-        # assert len(dict_ret['flag']) == 0
-        # assert len(dict_ret['friend']) == 20
-        # assert len(dict_ret['flag']) == 0
+        # Case 2: The last page of a friend's list of friends. There is no next.
+        tup_next_page = \
+            src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_VIEWING_FRIENDS_LAST_PAGE_HTML,
+                                           tests.util_test.init_parser())
+        self.assertIsNotNone(tup_next_page)
+        assert len(tup_next_page) == 0
 
     def test_create_get_req_friend_url_success(self):
         """Is a GET Request object created given a valid url?"""
