@@ -48,6 +48,26 @@ FAKEBOOK_LOGIN_HTML = r'''
 
 </html>
 '''
+FRIEND_LANDING_HTML = '''
+<html><head><title>Fakebook</title><style TYPE="text/css"><!--
+#pagelist li { display: inline; padding-right: 10px; }
+--></style></head><body><h1>Fakebook</h1><p><a href="/fakebook/">Home</a></p><hr/><h1><a href="/fakebook/996350946/">Pube Bregel</a></h1><h2>Basic Information</h2><ul><li>Sex: Female</li><li>Hometown: Woburn</li></ul><h2>Personal Information</h2><ul></ul><h2>Friends</h2><p><a href="/fakebook/996350946/friends/1/">View Pube Bregel's friends</a></p><h2>Wall</h2><p>
+Pube Bregel has not received any Wall posts.
+</p><h6>Fakebook is run by <a href="http://www.ccs.neu.edu/home/choffnes/">David Choffnes</a> at                        
+<a href="http://www.northeastern.edu">NEU</a>. It is meant for educational purposes only.                       
+For questions, contact <a href="mailto:choffnes@ccs.neu.edu">David Choffnes</a></h6></body></html>
+'''
+FRIEND_VIEWING_FRIENDS_HTML = '''
+<html><head><title>Fakebook</title><style TYPE="text/css"><!--
+#pagelist li { display: inline; padding-right: 10px; }
+--></style></head><body><h1>Fakebook</h1><p><a href="/fakebook/">Home</a></p><hr/><h1>Viewing <a href="/fakebook/996350946/">Pube Bregel</a>'s Friends</h1><ul><li><a href="/fakebook/8185551/">Zop Joxell</a></li><li><a href="/fakebook/70552327/">Jimavuzote Jotet</a></li><li><a href="/fakebook/79437786/">Junzo Trout</a></li><li><a href="/fakebook/89081356/">Rob Hegler</a></li><li><a href="/fakebook/152068235/">Nixegoco Sosed</a></li><li><a href="/fakebook/182325757/">Nivosi Xexep</a></li><li><a href="/fakebook/194756826/">Ludmilla Vacat</a></li><li><a href="/fakebook/216285855/">Malcom Burdi</a></li><li><a href="/fakebook/224009282/">Doranna Xivann</a></li><li><a href="/fakebook/299346627/">Giuseppe Waller</a></li><li><a href="/fakebook/306053677/">Nak Treloll</a></li><li><a href="/fakebook/316039351/">Mal Plevac</a></li><li><a href="/fakebook/320286626/">Hiliha Zbenenn</a></li><li><a href="/fakebook/320298083/">Hime Psehod</a></li><li><a href="/fakebook/322403147/">Jeaniene Brabil</a></li><li><a href="/fakebook/331516212/">Gavin Tupot</a></li><li><a href="/fakebook/414226914/">Tarah Mentkowski</a></li><li><a href="/fakebook/451340070/">Nenababonu Justiss</a></li><li><a href="/fakebook/464413390/">Dibume Bertin</a></li><li><a href="/fakebook/517450351/">Jeremias Plupet</a></li></ul><p>Page 1 of 2
+<ul id="pagelist"><li>
+1 
+
+</li><li><a href="/fakebook/996350946/friends/2/">2</a></li><li><a href="/fakebook/996350946/friends/2/">next</a></li><li><a href="/fakebook/996350946/friends/2/">last</a></li></ul></p><h6>Fakebook is run by <a href="http://www.ccs.neu.edu/home/choffnes/">David Choffnes</a> at                        
+<a href="http://www.northeastern.edu">NEU</a>. It is meant for educational purposes only.                       
+For questions, contact <a href="mailto:choffnes@ccs.neu.edu">David Choffnes</a></h6></body></html>
+'''
 FLAG_HTML = r'''<p>foobar</p>
 <h2 class="secret flag" style="color:red">FLAG: FB494811FFA433A2C36BFFEB3242C955113D38E95FA3101FE41A9EA586A4BF74</h2'''
 MEMBER_LANDING_YES_FLAG_HTML = MEMBER_LANDING_HTML + FLAG_HTML
