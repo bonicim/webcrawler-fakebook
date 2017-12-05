@@ -8,7 +8,10 @@ import src.my_htmlparser
 FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'
 FAKEBOOK_DOMAIN_URL = 'http://cs5700sp15.ccs.neu.edu'
 NEXT_VAL = '/fakebook/'
-
+VALUES_USERNAME = 'username'
+VALUES_PASSWORD = 'password'
+VALUES_NEXT = 'next'
+VALUES_CSRF = 'csrfmiddlewaretoken'
 
 def open_friend_page(friend_url):
     """Opens fakebook friend page given a 'friend_url'.
@@ -28,7 +31,6 @@ def parse_flags_friends_nextpage(fb_lpage_html, parser):
     'flag': [str_flag]
     'friend': [friend_rel_url]
      'next_page': [next_page_url]"""
-    # TODO
     dict_ret = {}
     dict_ret['flag'] = parse_flag(fb_lpage_html, parser)
     dict_ret['friend'] = parse_friend(fb_lpage_html, parser)
@@ -39,12 +41,14 @@ def parse_flags_friends_nextpage(fb_lpage_html, parser):
 
 
 def parse_flag(fb_lpage_html, parser):
-    parser.feed(fb_lpage_html)
+    parser.feed(fb_lpage_html)  # assumes that html is a raw string; might be a problem when getting html from site
     return list(filter(lambda x: 'FLAG' in x, parser.data_actual))
 
 
 def parse_friend(fb_lpage_html, parser):
-    return []
+    parser.feed(fb_lpage_html)
+    # get name value pairs
+    return None
 
 
 def parse_next_page(fb_lpage_html, parser):
@@ -136,18 +140,13 @@ def get_csrf_token_fakebook(opener, parser):
 def parse_token(html_page, parser):
     """Gets csrf token from a Fakebook login page"""
     parser.feed(html_page)
-    links = parser.links
-    csrf_dict = parser.links['csrf']
-    for key in csrf_dict:
-        if key == 'value':
-            return csrf_dict[key]
-    print("FAILURE. We should have parsed csrf token.")
+    return parser.csrf_token()[0]
 
 
 def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_URL):
     """Logs into http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/ with 'username' and 'password'
     Returns a String html landing page of the user's account."""
-    values = {'username': username, 'password': password, 'next': NEXT_VAL, 'csrfmiddlewaretoken': csrf_token}
+    values = {VALUES_USERNAME: username, VALUES_PASSWORD: password, VALUES_NEXT: NEXT_VAL, VALUES_CSRF: csrf_token}
     data = urllib.parse.urlencode(values).encode()
     return opener.open(url, data).read().decode()
 
