@@ -131,15 +131,10 @@ def init_html_parser():
     return parser
 
 
-def get_csrf_token_fakebook(opener, parser):
-    resp_login_page = opener.open(FAKEBOOK_LOGIN_URL)
+def get_csrf_token(opener, parser, url=FAKEBOOK_LOGIN_URL):
+    resp_login_page = opener.open(url)
     html_login = resp_login_page.read().decode()
-    return parse_token(html_login, parser)
-
-
-def parse_token(html_page, parser):
-    """Gets csrf token from a Fakebook login page"""
-    parser.feed(html_page)
+    parser.feed(html_login)
     return parser.csrf_token()[0]
 
 
@@ -166,7 +161,7 @@ def main():
     parser = init_html_parser() # Really bad design choice, implementation coupled with this parser
 
     # Get csrf token
-    csrf_token = get_csrf_token_fakebook(opener, parser)
+    csrf_token = get_csrf_token(opener, parser)
 
     # Login to Fakebook, parse for targets
     # links of friends, search for flags, and the next friends or link to list of friends
