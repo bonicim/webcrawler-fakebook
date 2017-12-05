@@ -23,7 +23,7 @@ class MyHTMLParser(HTMLParser):
         self.data_actual.append(data)
 
     def handle_secret_flag(self, attrs):
-        attr = dict(attrs) # a dictionary of name value pairs for a tag
+        attr = dict(attrs)  # a dictionary of name value pairs for a tag
         if len(attr) != 2:
             return
         if ('class' in attr and attr['class'] == 'secret flag') and ('style' in attr and attr['style'] == 'color:red'):
