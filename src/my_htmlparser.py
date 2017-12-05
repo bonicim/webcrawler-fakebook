@@ -1,10 +1,24 @@
 from html.parser import HTMLParser
-
+import copy
 
 class MyHTMLParser(HTMLParser):
     def __init__(self, *, convert_charrefs=True):
         super().__init__(convert_charrefs=convert_charrefs)
         self.__csrf_token = ()
+        self.__secret_flags = ()
+        self.__data_actual = []
+        self.__frozendata = ()
+
+    def csrf_token(self):
+        return self.__csrf_token
+
+    def secret_flags(self):
+        return tuple(filter(lambda data: 'FLAG' in data, self.__frozendata))
+
+    def feed(self, data):
+        super().feed(data)
+        self.__frozendata = tuple(copy.deepcopy(self.__data_actual))
+        self.__data_actual.clear()
 
     def add_flag(self, set_flag, flag):
         return set_flag.union(flag)
@@ -18,30 +32,27 @@ class MyHTMLParser(HTMLParser):
     def parse_csrf(self, attr):
         if 'csrfmiddlewaretoken' in attr.values():
             self.__csrf_token = (attr['value'],)
-            print("We have csrf: ", self.__csrf_token)
-        else:
-            print("No csrf token found in this input tag")
-
-    def csrf_token(self):
-        return self.__csrf_token
 
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
-            self.handle_secret_flag(attrs)
+            self.parse_secret_flag(attrs)
         elif tag == 'a':
             self.handle_friend_url(attrs)
 
     def handle_data(self, data):
-        self.data_actual.append(data)
+        self.__data_actual.append(data)
 
-    def handle_secret_flag(self, attrs):
+    def parse_secret_flag(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for a tag
         if len(attr) != 2:
             return
-        if ('class' in attr and attr['class'] == 'secret flag') and ('style' in attr and attr['style'] == 'color:red'):
-            self.links['secret_flag'] = attr
-        else:
-            return
+        if self.is_secret_flag(attr):
+            # TODO Must find a way to verify that FLAG values are contained within secret flag
+            pass
+
+    def is_secret_flag(self, attr):
+        return ('class' in attr and attr['class'] == 'secret flag') and \
+               ('style' in attr and attr['style'] == 'color:red')
 
     def handle_friend_url(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for an 'a' tag with one href pair

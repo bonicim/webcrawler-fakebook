@@ -45,29 +45,38 @@ class WebcrawlerTestCase(unittest.TestCase):
         """Does an error page for an invalid view friends url get returned?"""
         pytest.skip()
 
+    def test_parse_csrf_success(self):
+        """Does a """
+
     def test_parse_flag_where_flag_present(self):
         """Does a list of one flag get returned?"""
         html = tests.util_test_html.FAKEBOOK_LOGIN_YES_FLAG_HTML
-        flag_list = src.webcrawler.parse_flag(html, tests.util_test.init_parser())
-        self.assertIsNotNone(flag_list)
-        for flag in flag_list:
+        flag_tuple = src.webcrawler.parse_flag(html, tests.util_test.init_parser())
+        self.assertIsNotNone(flag_tuple)
+        for flag in flag_tuple:
             assert len(flag.split(':')[1].strip()) == SECRET_FLAG_LEN
 
-    def test_parse_flag_where_3flag_present(self):
+    def test_parse_flag_where_multi_flag_present(self):
         """Does a list of three flags get returned?"""
         html = tests.util_test_html.FAKEBOOK_LOGIN_YES_3_FLAG_HTML
-        flag_list = src.webcrawler.parse_flag(html, tests.util_test.init_parser())
-        self.assertIsNotNone(flag_list)
-        assert len(flag_list) == 3
-        for flag in flag_list:
+        flag_tuple = src.webcrawler.parse_flag(html, tests.util_test.init_parser())
+        self.assertIsNotNone(flag_tuple)
+        assert len(flag_tuple) == 3
+        for flag in flag_tuple:
+            assert len(flag.split(':')[1].strip()) == SECRET_FLAG_LEN
+        html = tests.util_test_html.FAKEBOOK_LOGIN_YES_4_FLAG_HTML
+        flag_tuple = src.webcrawler.parse_flag(html, tests.util_test.init_parser())
+        self.assertIsNotNone(flag_tuple)
+        assert len(flag_tuple) == 4
+        for flag in flag_tuple:
             assert len(flag.split(':')[1].strip()) == SECRET_FLAG_LEN
 
     def test_parse_flag_where_flag_absent(self):
         """Does an empty list get returned?"""
-        flag_list = \
+        flag_tuple = \
             src.webcrawler.parse_flag(tests.util_test_html.FAKEBOOK_LOGIN_HTML, tests.util_test.init_parser())
-        self.assertIsNotNone(flag_list)
-        assert len(flag_list) == 0
+        self.assertIsNotNone(flag_tuple)
+        assert len(flag_tuple) == 0
 
     def test_parse_friend_where_friends_present(self):
         """Does a list of friend url's get returned?"""

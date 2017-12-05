@@ -28,9 +28,9 @@ def open_view_friends_page(friend_page_url):
 def parse_flags_friends_nextpage(fb_lpage_html, parser):
     """Parses a fakebook member's landing page for secret flags, friends, and a next page link
     Returns a dictionary consisting of the following key value pairs:
-    'flag': [str_flag]
-    'friend': [friend_rel_url]
-     'next_page': [next_page_url]"""
+    'flag': (str_flag,)
+    'friend': (friend_rel_url,)
+     'next_page': (next_page_url,)"""
     dict_ret = {}
     dict_ret['flag'] = parse_flag(fb_lpage_html, parser)
     dict_ret['friend'] = parse_friend(fb_lpage_html, parser)
@@ -42,7 +42,7 @@ def parse_flags_friends_nextpage(fb_lpage_html, parser):
 
 def parse_flag(fb_lpage_html, parser):
     parser.feed(fb_lpage_html)  # assumes that html is a raw string; might be a problem when getting html from site
-    return list(filter(lambda x: 'FLAG' in x, parser.data_actual))
+    return parser.secret_flags()
 
 
 def parse_friend(fb_lpage_html, parser):
@@ -158,7 +158,7 @@ def main():
     opener = build_custom_opener(cookiejar)
 
     # Setup parser to parse html pages
-    parser = init_html_parser() # Really bad design choice, implementation coupled with this parser
+    parser = src.my_htmlparser.MyHTMLParser()
 
     # Get csrf token
     csrf_token = get_csrf_token(opener, parser)
