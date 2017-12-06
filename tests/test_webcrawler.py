@@ -110,15 +110,20 @@ class WebcrawlerTestCase(unittest.TestCase):
             src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_VIEWING_FRIENDS_HTML,
                                            tests.util_test.init_parser())
         self.assertIsNotNone(tup_next_page)
-        assert len(tup_next_page) > len('/fakebook/996350946/')
-        assert tup_next_page[0] == '/fakebook/996350946/friends/2/'
+        assert len(tup_next_page) > 0
+        assert len(tup_next_page) == 2
+        for url in tup_next_page:
+            assert len(url) > len('/fakebook/996350946/')
+        assert '/fakebook/996350946/friends/2/' in tup_next_page
 
         # Case 2: Landing page of friend where the next page must be the first page
         tup_next_page = \
             src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_LANDING_HTML, tests.util_test.init_parser())
         self.assertIsNotNone(tup_next_page)
-        assert len(tup_next_page) > len('/fakebook/996350946/')
-        assert tup_next_page[0] == '/fakebook/996350946/friends/1/'
+        assert len(tup_next_page) > 0
+        for url in tup_next_page:
+            assert len(url) > len('/fakebook/996350946/')
+        assert '/fakebook/996350946/friends/1/' in tup_next_page
 
     def test_parse_next_page_where_next_absent(self):
         """Does a dictionary containing 3 key value pairs get returned?"""
@@ -133,7 +138,9 @@ class WebcrawlerTestCase(unittest.TestCase):
             src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_VIEWING_FRIENDS_LAST_PAGE_HTML,
                                            tests.util_test.init_parser())
         self.assertIsNotNone(tup_next_page)
-        assert len(tup_next_page) == 0
+        assert len(tup_next_page) > 0
+        for url in tup_next_page:
+            assert len(url) > len('/fakebook/996350946/')
 
     def test_create_get_req_friend_url_success(self):
         """Is a GET Request object created given a valid url?"""
