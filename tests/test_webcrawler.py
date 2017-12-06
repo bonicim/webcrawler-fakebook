@@ -111,7 +111,7 @@ class WebcrawlerTestCase(unittest.TestCase):
                                            tests.util_test.init_parser())
         self.assertIsNotNone(tup_next_page)
         assert len(tup_next_page) > 0
-        assert len(tup_next_page) == 2
+        assert len(tup_next_page) == 3
         for url in tup_next_page:
             assert len(url) > len('/fakebook/996350946/')
         assert '/fakebook/996350946/friends/2/' in tup_next_page
@@ -120,7 +120,7 @@ class WebcrawlerTestCase(unittest.TestCase):
         tup_next_page = \
             src.webcrawler.parse_next_page(tests.util_test_html.FRIEND_LANDING_HTML, tests.util_test.init_parser())
         self.assertIsNotNone(tup_next_page)
-        assert len(tup_next_page) > 0
+        assert len(tup_next_page) == 1
         for url in tup_next_page:
             assert len(url) > len('/fakebook/996350946/')
         assert '/fakebook/996350946/friends/1/' in tup_next_page
