@@ -32,9 +32,9 @@ def parse_flags_friends_pagelist(fb_lpage_html, parser):
      'next_page': (next_page_url,)"""
     dict_ret = {}
     parser.feed(fb_lpage_html)
-    dict_ret['flag'] = parser.secret_flags()
-    dict_ret['friend'] = parser.friends()
-    dict_ret['next_page'] = parser.pagelist()
+    dict_ret['flags'] = parser.secret_flags()
+    dict_ret['friends'] = parser.friends()
+    dict_ret['page_list'] = parser.pagelist()
     return dict_ret
 
 # Helpers
