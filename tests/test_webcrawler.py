@@ -8,6 +8,7 @@ import src.my_htmlparser
 
 
 SECRET_FLAG_LEN = 64
+SECRET_CSRF_LEN = 32
 
 class WebcrawlerTestCase(unittest.TestCase):
     """ Tests for webcrawler.py.
@@ -46,7 +47,12 @@ class WebcrawlerTestCase(unittest.TestCase):
         pytest.skip()
 
     def test_parse_csrf_success(self):
-        """Does a """
+        "Does a CSRF token get returned when landing on the login page?"
+        parser = tests.util_test.init_parser()
+        opener = tests.util_test.init_opener()
+        csrf = src.webcrawler.get_csrf_token(opener, parser, tests.util_test.FB_LOGIN_URL)
+        self.assertIsNotNone(csrf)
+        assert len(csrf) == SECRET_CSRF_LEN
 
     def test_parse_flag_where_flag_present(self):
         """Does a list of one flag get returned?"""
