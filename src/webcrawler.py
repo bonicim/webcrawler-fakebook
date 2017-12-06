@@ -1,7 +1,6 @@
 import sys
 import urllib.request
 import urllib.parse
-import re
 import http.cookiejar
 import src.my_htmlparser
 
@@ -120,17 +119,6 @@ def init_cookiejar():
     return urllib.request.HTTPCookieProcessor(cj)
 
 
-def build_custom_opener(cookiejar):
-    return urllib.request.build_opener(cookiejar)
-
-
-def init_html_parser():
-    parser = src.my_htmlparser.MyHTMLParser()
-    parser.links = {}  # we are adding an attribute to the HTMLParser class
-    parser.data_actual = []
-    return parser
-
-
 def get_csrf_token(opener, parser, url=FAKEBOOK_LOGIN_URL):
     resp_login_page = opener.open(url)
     html_login = resp_login_page.read().decode()
@@ -154,8 +142,7 @@ def main():
 
     # Setup opener to access internet
     opts = getopts(sys.argv)
-    cookiejar = init_cookiejar()
-    opener = build_custom_opener(cookiejar)
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
     # Setup parser to parse html pages
     parser = src.my_htmlparser.MyHTMLParser()
