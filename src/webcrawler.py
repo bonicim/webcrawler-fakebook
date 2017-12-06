@@ -3,7 +3,12 @@ import urllib.request
 import urllib.parse
 import http.cookiejar
 import src.my_htmlparser
+import queue
+from threading import Thread
+import time
 
+
+# global vars
 FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'
 FAKEBOOK_DOMAIN_URL = 'http://cs5700sp15.ccs.neu.edu'
 NEXT_VAL = '/fakebook/'
@@ -11,18 +16,21 @@ VALUES_USERNAME = 'username'
 VALUES_PASSWORD = 'password'
 VALUES_NEXT = 'next'
 VALUES_CSRF = 'csrfmiddlewaretoken'
+NUM_THREADS = 10
 
-def open_friend_page(friend_url):
+friend_frontier_q = queue.Queue()  # thread safe
+flags_q = queue.Queue()
+visited_set = frozenset()  # thread safe
+
+
+def open_friend_page(friend_url, opener):
     """Opens fakebook friend page given a 'friend_url'.
-    Returns a String html landing page of the friend's fakebook profile."""
-    pass
-
-
-def open_view_friends_page(friend_page_url):
-    """Opens the view friends link on a fakebook member page"
-    Returns a String html page showing the list of friends of a given fakebook member."""
-    pass
-
+    Returns a dictionary of relevant info from a fakebook page"""
+    try:
+        pass
+    except:
+        pass
+    return dict()
 
 def parse_flags_friends_pagelist(fb_lpage_html, parser):
     """Parses a fakebook member's landing page for secret flags, friends, and a next page link
@@ -36,8 +44,6 @@ def parse_flags_friends_pagelist(fb_lpage_html, parser):
     dict_ret['friends'] = parser.friends()
     dict_ret['page_list'] = parser.pagelist()
     return dict_ret
-
-# Helpers
 
 
 def parse_flag(fb_lpage_html, parser):
@@ -55,29 +61,8 @@ def parse_next_page(fb_lpage_html, parser):
     return parser.pagelist()
 
 
-def add_secret_flag(new_flag, collection_flag):
-    """Adds new_flag to collection_flag. Returns the updated list."""
-    pass
-
-
 def add_friend(friend, collection_friend):
     """Returns updated collection_friend"""
-    pass
-
-
-def is_unique_user(friend, collection_friend):
-    """Returns true if friend is not in collection_friend; false otherwise."""
-    pass
-
-
-def add_friend_to_frontier(friend, collection_frontier):
-    """Returns updated collection_frontier"""
-    pass
-
-
-def remove_friend_to_frontier(collection_frontier):
-    """Removes a random friend from collection_frontier
-     and returns a Tuple consisting of the removed friend and updated collection."""
     pass
 
 
@@ -115,25 +100,26 @@ def getopts(argv):
     return opts
 
 
-def init_cookiejar():
-    cj = http.cookiejar.CookieJar()
-    return urllib.request.HTTPCookieProcessor(cj)
-
-
 def get_csrf_token(opener, parser, url=FAKEBOOK_LOGIN_URL):
-    resp_login_page = opener.open(url)
-    html_login = resp_login_page.read().decode()
-    parser.feed(html_login)
-    return parser.csrf_token()[0]
-
+    try:
+        resp_login_page = opener.open(url)
+        html_login = resp_login_page.read().decode()
+        parser.feed(html_login)
+        data = parser.csrf_token()[0]
+    except urllib.request.URLError:
+        data = 'URL not found.'
+    return data
 
 def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_URL):
     """Logs into http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/ with 'username' and 'password'
     Returns a String html landing page of the user's account."""
     values = {VALUES_USERNAME: username, VALUES_PASSWORD: password, VALUES_NEXT: NEXT_VAL, VALUES_CSRF: csrf_token}
-    data = urllib.parse.urlencode(values).encode()
-    return opener.open(url, data).read().decode()
-
+    try:
+        data = urllib.parse.urlencode(values).encode()
+        data = opener.open(url, data).read().decode()
+    except urllib.request.URLError:
+        data = 'URL not found.'
+    return data
 
 def main():
     # Accumulators
@@ -141,28 +127,28 @@ def main():
     # list_flags = []
     # set_users = set()
 
-    # Setup opener to access internet
+    # Setup opener to access internet; parser
     opts = getopts(sys.argv)
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
-
-    # Setup parser to parse html pages
     parser = src.my_htmlparser.MyHTMLParser()
 
-    # Get csrf token
-    csrf_token = get_csrf_token(opener, parser)
-
     # Login to Fakebook, parse for targets
-    # links of friends, search for flags, and the next friends or link to list of friends
+    csrf_token = get_csrf_token(opener, parser)
     html_login = login_fakebook(csrf_token, opener, opts[0], opts[1])
-    print(html_login)
-    dict_tgts = parse_flags_friends_pagelist(html_login, parser)
-    for key in dict_tgts:
-        print("Key: ", key, " Value: ", dict_tgts[key])
+    dict_ret = parse_flags_friends_pagelist(html_login, parser)
+    if len(dict_ret['flags']) > 0:
+        for flag in dict_ret['flags']:
+            flags_q.put(flag)
+    if len(dict_ret['friends']) > 0:
+        for flag in dict_ret['flags']:
+            friend_frontier_q.put(flag)
+    # Note: assumes member does not have more than one page of friends
 
-    # Access a Friends page and scrape
+    # create threads; each thread has its own parser and opener
+    # kickoff threads to search each friend
 
     # Finish scraping the site and print the results
-
+    print('Main complete.')
 
 if __name__ == "__main":
     main()
