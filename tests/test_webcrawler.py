@@ -30,21 +30,14 @@ class WebcrawlerTestCase(unittest.TestCase):
         """Does an error page for an invalid fakebook profile get returned?"""
         pytest.skip()
 
-    def test_open_friend_page_success(self):
+    def test_get_all_friends_flags_not_empty(self):
         """Does a valid fakebook landing page of a friend get returned?"""
-        pytest.skip()
-
-    def test_open_friend_page_failure(self):
-        """Does an error page for an invalid fakebook profile get returned?"""
-        pytest.skip()
-
-    def test_open_view_friends_page_success(self):
-        """Does a fakebook view friends page of a valid friend get returned?"""
-        pytest.skip()
-
-    def test_open_view_friends_page_failure(self):
-        """Does an error page for an invalid view friends url get returned?"""
-        pytest.skip()
+        friend_list, flag_list = src.webcrawler.get_all_friends_flags(tests.util_test.FRIEND_HOME_URL,
+                                                                      tests.util_test.init_opener())
+        self.assertIsNotNone(friend_list)
+        self.assertIsNotNone(flag_list)
+        assert len(flag_list) == 0
+        assert len(friend_list) == 86
 
     def test_parse_csrf_success(self):
         "Does a CSRF token get returned when landing on the login page?"
