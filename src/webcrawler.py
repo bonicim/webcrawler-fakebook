@@ -51,7 +51,8 @@ def parse_friend(fb_lpage_html, parser):
 
 
 def parse_next_page(fb_lpage_html, parser):
-    return re.findall(r'<ul id="pagelist">(.*?)</ul', fb_lpage_html)
+    parser.feed(fb_lpage_html)
+    return parser.pagelist()
 
 
 def add_secret_flag(new_flag, collection_flag):

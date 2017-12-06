@@ -9,6 +9,7 @@ class MyHTMLParser(HTMLParser):
         self.__data_actual = []
         self.__frozendata = ()
         self.__friends = ()
+        self.__pagelist = ()
 
     def csrf_token(self):
         return self.__csrf_token
@@ -18,6 +19,9 @@ class MyHTMLParser(HTMLParser):
 
     def friends(self):
         return self.__friends
+
+    def pagelist(self):
+        return self.__pagelist
 
     def feed(self, data):
         self.flush_accumulators()
@@ -29,6 +33,7 @@ class MyHTMLParser(HTMLParser):
         self.__secret_flags = ()
         self.__data_actual.clear()
         self.__friends = ()
+        self.__pagelist = ()
 
     def handle_data(self, data):
         self.__data_actual.append(data)
@@ -48,6 +53,7 @@ class MyHTMLParser(HTMLParser):
             self.parse_secret_flag(attrs)
         elif tag == 'a':
             self.parse_friend_url(attrs)
+            self.parse_viewing_friends_links(attrs)
 
     def parse_secret_flag(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for a tag
@@ -72,4 +78,18 @@ class MyHTMLParser(HTMLParser):
         return 'href' in attr and \
                attr['href'].startswith('/fakebook/') and \
                len(attr['href']) > 10 and \
-               'friends' not in attr['href']
+                'friends' not in attr['href']
+
+    def parse_viewing_friends_links(self, attrs):
+        attr = dict(attrs)  # a dictionary of name value pairs for an 'a' tag
+        if len(attr) != 1:  # a tags that we care about should only have one name value pair
+            return
+        if self.is_href_pagelist_friends(attr):
+            self.__pagelist = self.__pagelist + (attr['href'],)
+
+    def is_href_pagelist_friends(self, attr):
+        return 'href' in attr and \
+               attr['href'].startswith('/fakebook/') and \
+               'friends' in attr['href'] and \
+               len(attr['href']) >= len('/fakebook/friends/1')
+
