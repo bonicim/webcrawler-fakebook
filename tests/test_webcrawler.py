@@ -148,6 +148,61 @@ class WebcrawlerTestCase(unittest.TestCase):
         for url in tup_next_page:
             assert len(url) > len('/fakebook/996350946/')
 
+    def test_parse_flags_friends_pagelist(self):
+        # Case 1: Member homepage
+        dict_ret = src.webcrawler.parse_flags_friends_pagelist(
+            tests.util_test_html.MEMBER_LANDING_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(dict_ret)
+        assert len(dict_ret) == 3
+        assert len(dict_ret['flags']) == 0
+        assert len(dict_ret['friends']) == 10
+        assert len(dict_ret['page_list']) == 0
+
+        # Case 2: Friend homepage
+        dict_ret = src.webcrawler.parse_flags_friends_pagelist(
+            tests.util_test_html.FRIEND_LANDING_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(dict_ret)
+        assert len(dict_ret) == 3
+        assert len(dict_ret['flags']) == 0
+        assert len(dict_ret['friends']) == 1
+        assert len(dict_ret['page_list']) == 1
+
+        # Case 3: View Friends List
+        dict_ret = src.webcrawler.parse_flags_friends_pagelist(
+            tests.util_test_html.FRIEND_VIEWING_FRIENDS_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(dict_ret)
+        assert len(dict_ret) == 3
+        assert len(dict_ret['flags']) == 0
+        assert len(dict_ret['friends']) == 21
+        assert len(dict_ret['page_list']) == 3
+
+        # Case 4: View Friends Last Page
+        dict_ret = src.webcrawler.parse_flags_friends_pagelist(
+        tests.util_test_html.FRIEND_VIEWING_FRIENDS_LAST_PAGE_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(dict_ret)
+        assert len(dict_ret) == 3
+        assert len(dict_ret['flags']) == 0
+        assert len(dict_ret['friends']) == 15
+        assert len(dict_ret['page_list']) == 3
+
+        # Case 5: Login Form Page
+        dict_ret = src.webcrawler.parse_flags_friends_pagelist(
+            tests.util_test_html.FAKEBOOK_LOGIN_YES_3_FLAG_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(dict_ret)
+        assert len(dict_ret) == 3
+        assert len(dict_ret['flags']) == 3
+        assert len(dict_ret['friends']) == 0
+        assert len(dict_ret['page_list']) == 0
+
+        # Case 6: View Friends Last Page with Flags
+        dict_ret = src.webcrawler.parse_flags_friends_pagelist(
+            tests.util_test_html.MEMBER_LANDING_YES_FLAG_HTML, tests.util_test.init_parser())
+        self.assertIsNotNone(dict_ret)
+        assert len(dict_ret) == 3
+        assert len(dict_ret['flags']) == 1
+        assert len(dict_ret['friends']) == 10
+        assert len(dict_ret['page_list']) == 0
+
     def test_create_get_req_friend_url_success(self):
         """Is a GET Request object created given a valid url?"""
         self.assertIsInstance(src.webcrawler.create_get_req(tests.util_test.FRIEND_HOME_URL),
