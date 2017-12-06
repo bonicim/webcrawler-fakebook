@@ -88,8 +88,11 @@ class MyHTMLParser(HTMLParser):
             self.__pagelist = self.__pagelist + (attr['href'],)
 
     def is_href_pagelist_friends(self, attr):
+        # looks for links that are of the form
+        # '/fakebook/<some id>/friends/<some number>' and the last letter is a digit
         return 'href' in attr and \
                attr['href'].startswith('/fakebook/') and \
                'friends' in attr['href'] and \
-               len(attr['href']) >= len('/fakebook/friends/1')
+               len(attr['href']) >= len('/fakebook/friends/1') and \
+               attr['href'][-2].isdigit()
 
