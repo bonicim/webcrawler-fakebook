@@ -1,5 +1,7 @@
 import urllib.parse
 import src.my_htmlparser
+import http.cookiejar
+import urllib.request
 
 USERNAME = 'bonicillo.m'
 PASSWORD = 'toast'
@@ -18,8 +20,9 @@ LOGIN_DATA = urllib.parse.urlencode(
 
 def init_parser():
     parser = src.my_htmlparser.MyHTMLParser()
-    # adding attributes to HTMLParser class
-    parser.links = {}
-    parser.data_actual = []
     return parser
+
+
+def init_opener():
+    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
