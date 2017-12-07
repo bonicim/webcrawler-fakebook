@@ -26,3 +26,6 @@ def init_parser():
 def init_opener():
     return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
+
+SECRET_FLAG_LEN = 64
+SECRET_CSRF_LEN = 32
