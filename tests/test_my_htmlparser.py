@@ -104,3 +104,4 @@ class WebcrawlerTestCase(unittest.TestCase):
 		assert len(tup_next_page) > 0
 		for url in tup_next_page:
 			assert len(url) > len('/fakebook/996350946/')
+
