@@ -11,12 +11,16 @@ class MyHTMLParser(HTMLParser):
         self.__frozendata = ()
         self.__friends = ()
         self.__pagelist = ()
+        self.__secret_flags_attr = ()
+
+    def secret_flags_attr(self):
+        return self.__secret_flags_attr
 
     def csrf_token(self):
         return self.__csrf_token
 
     def secret_flags(self):
-        return tuple(filter(lambda data: 'FLAG' in data, self.__frozendata))
+        return tuple(filter(lambda data: 'FLAG' in data or 'flag' in data , self.__frozendata))
 
     def friends(self):
         return self.__friends
@@ -50,23 +54,23 @@ class MyHTMLParser(HTMLParser):
             self.__csrf_token = (attr['value'],)
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'h2':
-            self.parse_secret_flag(attrs)
-        elif tag == 'a':
+        if tag == 'a':
             self.parse_friend_url(attrs)
             self.parse_viewing_friends_links(attrs)
+        elif tag == 'h2':
+            self.parse_secret_flag(attrs)
 
     def parse_secret_flag(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for a tag
         if len(attr) != 2:
             return
         if self.is_secret_flag(attr):
-            # TODO Must find a way to verify that FLAG values are contained within secret flag
-            pass
+            print("We found a FLAG: ", attr)
+            self.__secret_flags_attr = self.__secret_flags_attr + (attr,)
 
     def is_secret_flag(self, attr):
-        return ('class' in attr and attr['class'] == 'secret flag') and \
-              ('style' in attr and attr['style'] == 'color:red')
+        return ('class' in attr and attr['class'] == 'secret_flag') or \
+              ('style' in attr and attr['style'] == "color:red")
 
     def parse_friend_url(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for an 'a' tag
