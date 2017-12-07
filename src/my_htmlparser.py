@@ -1,6 +1,7 @@
 from html.parser import HTMLParser
 import copy
 
+
 class MyHTMLParser(HTMLParser):
     def __init__(self, *, convert_charrefs=True):
         super().__init__(convert_charrefs=convert_charrefs)
