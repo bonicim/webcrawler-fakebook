@@ -65,7 +65,7 @@ class MyHTMLParser(HTMLParser):
 
     def is_secret_flag(self, attr):
         return ('class' in attr and attr['class'] == 'secret flag') and \
-               ('style' in attr and attr['style'] == 'color:red')
+              ('style' in attr and attr['style'] == 'color:red')
 
     def parse_friend_url(self, attrs):
         attr = dict(attrs)  # a dictionary of name value pairs for an 'a' tag
@@ -75,6 +75,7 @@ class MyHTMLParser(HTMLParser):
             self.__friends = self.__friends + (attr['href'],)
 
     def is_href_fakebook_friend_url(self, attr):
+        # Ensures that we only scrape Fakebook URL's
         return 'href' in attr and \
                attr['href'].startswith('/fakebook/') and \
                len(attr['href']) > 10 and \
@@ -88,6 +89,7 @@ class MyHTMLParser(HTMLParser):
             self.__pagelist = self.__pagelist + (attr['href'],)
 
     def is_href_pagelist_friends(self, attr):
+        # Ensures that we only scrape Fakebook URL's
         # looks for links that are of the form
         # '/fakebook/<some id>/friends/<some number>' and the last letter is a digit
         return 'href' in attr and \
