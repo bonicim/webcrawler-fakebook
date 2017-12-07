@@ -16,11 +16,12 @@ VALUES_USERNAME = 'username'
 VALUES_PASSWORD = 'password'
 VALUES_NEXT = 'next'
 VALUES_CSRF = 'csrfmiddlewaretoken'
-NUM_THREADS = 9
+NUM_THREADS = 10
 
 q_frontier = queue.Queue()  # thread safe
 q_flags = []
 visited_set = frozenset()  # thread safe
+total_loop_count = 0
 
 
 def parse_flags_friends_page_list(html_fakebook, parser):
@@ -145,10 +146,9 @@ def get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set, 
         flag_list.extend(list(dict_ret['flags']))
         for el in dict_ret['page_list']:
             page_list_set.add(el)
-        return get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set, visited_page_set, parser)
     except urllib.request.URLError:
-        print('URL not found')
-        print(url, ' is a bad link.')
+        print('URL not found: ', url)
+    finally:
         return get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set, visited_page_set, parser)
 
 
@@ -156,11 +156,15 @@ def process_url(url, opener, lock):
     global visited_set
     global q_frontier
     global q_flags
+    global total_loop_count
     with lock:
         visited_set = visited_set.union((url,))
     friends_list, flags_list = get_all_friends_flags(create_fb_absolute_url(url), opener)
-    friends_list = list(filter(lambda x: x not in visited_set, friends_list))
-    for friend in friends_list:
+    friends_list_no_dupes = list(filter(lambda x: x not in visited_set, friends_list))
+    potential_loop_count = len(friends_list) - len(friends_list_no_dupes)
+    with lock:
+        total_loop_count += potential_loop_count
+    for friend in friends_list_no_dupes:
         q_frontier.put(friend)
     with lock:
         q_flags = q_flags + flags_list
@@ -169,17 +173,21 @@ def process_url(url, opener, lock):
 def worker(opener, lock):
     print(threading.current_thread().getName(), 'Starting')
     while True:
-        url = q_frontier.get()
-        if url is None:
-            break
-        if url not in visited_set:
-            print("Visiting Friend: ", url)
-            process_url(url, opener, lock)
-            print("Finished visiting ", url)
-        q_frontier.task_done()
-        print('\n', "Remaining frontier: ", q_frontier.qsize())
-        print("Friend count: ", len(visited_set), '\n')
-    print(threading.current_thread().getName(), 'Exiting')
+        try:
+            url = q_frontier.get()
+            if url is None:
+                break
+            if url not in visited_set:
+                print("Visiting Friend: ", url)
+                process_url(url, opener, lock)
+                print("Finished visiting Friend ", url)
+        except:
+            print("Getting an item in frontier failed.")
+        finally:
+            q_frontier.task_done()
+    print("Frontier count: ", q_frontier.qsize())
+    print("Friend count: ", len(visited_set), '\n')
+    print(threading.current_thread().getName(), 'Exiting', '\n')
 
 
 def main():
@@ -208,21 +216,21 @@ def main():
         threads.append(t)
         t.start()
     q_frontier.join()
-    end_time = time.time()
-    # kill the threads
     for i in range(NUM_THREADS):
         q_frontier.put(None)
     for t in threads:
         t.join()
-    print("Main complete.")
+
+    end_time = time.time()
+    print()
     print("Start time: ", start_time)
     print("End time: ", end_time)
     duration = (end_time - start_time)
     hours = duration // 3600
     minutes = duration // 60 - hours * 60
-    print()
     print("Time to complete: ", hours, ' hours and ', minutes, ' minutes.')
     print("Remaining queue should be zero: ", q_frontier.qsize())
+    print("Potential loop count: ", total_loop_count)
     print("Flags count: ", len(q_flags))
     print("Friend count should be about 2500: ", len(visited_set))
     # i = 1
