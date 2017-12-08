@@ -51,13 +51,14 @@ def parse_flags_friends_page_list(html_fakebook, parser):
      'next_page': (next_page_url,)"""
 	dict_ret = {}
 	parser.feed(html_fakebook)
-	dict_ret['flags'] = parser.secret_flags()  # a tuple
+	dict_ret['flags'] = parser.secret_flags_attr()  # a tuple
 	dict_ret['friends'] = parser.friends()  # a tuple
 	dict_ret['page_list'] = parser.pagelist()  # a tuple
 	return dict_ret
 
 
 def create_get_req(url):
+	#TODO: keep-alive make one connection to be more efficient
 	"""Returns a GET Request object given a String url."""
 	return urllib.request.Request(url)
 
@@ -113,7 +114,8 @@ def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_UR
 		data_received = 'URL not found: ' + url
 	return data_received
 
-
+# TODO: Handle 301- redirect, try again with new url in location try 403: abandon search
+# and 500: retry until successful
 def get_all_friends_flags(url, opener):
 	global total_URL_not_found
 	parser = src.my_htmlparser.MyHTMLParser()
@@ -197,7 +199,6 @@ def worker(opener, lock):
 			q_frontier.task_done()
 			# print("Frontier count: ", q_frontier.qsize())
 			# print("Friend count: ", len(visited_set), '\n')
-	print(threading.current_thread().getName(), 'Exiting', '\n')
 
 
 def create_custom_opener():
@@ -242,18 +243,21 @@ def scraper_output(start_time):
 	minutes = duration // 60 - hours * 60
 	print("Time to complete: ", hours, ' hours and ', minutes, ' minutes.')
 	print("Workers count: ", NUM_THREADS)
-	print("Total URL Not Found: ", total_URL_not_found)
-	print("Remaining queue should be zero: ", q_frontier.qsize())
-	print("Potential loop count: ", total_loop_count)
+	# print("Total URL Not Found: ", total_URL_not_found)
+	# print("Remaining queue should be zero: ", q_frontier.qsize())
+	# print("Potential loop count: ", total_loop_count)
 	print("Flags count: ", len(q_flags))
 	print("Printing flags if any found: ")
-	for flag in q_flags:
-		print(flag)
+	if len(q_flags) != 0:
+		for flag in q_flags:
+			print(flag)
+	else:
+		print("No flags found.", '\n')
 	print("Friend Count: ", len(visited_set))
 
 
 def scraper_feedback():
-	print("Scraping Fakebook ", FAKEBOOK_DOMAIN_URL)
+	print("Scraping Fakebook: ", FAKEBOOK_DOMAIN_URL)
 	print('Workers tasked: ', NUM_THREADS)
 	print('Depending on the machines computing power, this might take awhile (avg 3-10 min).......')
 

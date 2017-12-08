@@ -41,6 +41,8 @@ class MyHTMLParser(HTMLParser):
         self.__pagelist = ()
 
     def handle_data(self, data):
+        if 'FLAG' in data or 'flag' in data:
+            print(data)
         self.__data_actual.append(data)
 
     def handle_startendtag(self, tag, attrs):
@@ -64,6 +66,7 @@ class MyHTMLParser(HTMLParser):
         attr = dict(attrs)  # a dictionary of name value pairs for a tag
         if len(attr) != 2:
             return
+        print(attr)
         if self.is_secret_flag(attr):
             print("We found a FLAG: ", attr)
             self.__secret_flags_attr = self.__secret_flags_attr + (attr,)

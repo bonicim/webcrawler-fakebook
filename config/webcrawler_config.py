@@ -1,4 +1,3 @@
-
 # FAKEBOOK_LOGIN_URL = 'http://fring.ccs.neu.edu/accounts/login/?next=/fakebook/'
 # FAKEBOOK_DOMAIN_URL = 'http://fring.ccs.neu.edu'
 FAKEBOOK_LOGIN_URL = 'http://cs5700sp15.ccs.neu.edu/accounts/login/?next=/fakebook/'
