@@ -25,7 +25,8 @@ def main():
 	opts = getopts(sys.argv)
 
 	# Setup Opener and Parser
-	opener = create_custom_opener()
+	cj = http.cookiejar.CookieJar()
+	opener = create_custom_opener(cj)
 	parser = src.my_htmlparser.MyHTMLParser()
 
 	# Login to Fakebook and initialize queue with friends
@@ -34,10 +35,10 @@ def main():
 	dict_tgt = parse_flags_friends_page_list(html_login, parser)
 	add_flags_to_flag_queue(dict_tgt['flags'], lock)
 	add_friends_to_frontier(dict_tgt['friends'])
-	# ASSUMPTION: member does not have more than
+	# ASSUMPTION: member does not have more than 20 friends and thus no page 2 of friends
 
 	# Kickoff and end web scraping
-	setup_threads(threads, opener, lock)
+	setup_threads(threads, cj, lock)
 	stop_threads(threads)
 
 	scraper_output(start_time)
@@ -109,13 +110,17 @@ def login_fakebook(csrf_token, opener, username, password, url=FAKEBOOK_LOGIN_UR
 	try:
 		data_sent = urllib.parse.urlencode(values).encode()
 		data_received = opener.open(url, data_sent).read().decode()
-	except urllib.request.URLError:
+		return data_received
+	except urllib.request.HTTPError as e:
 		total_URL_not_found += 1
-		data_received = 'URL not found: ' + url
-	return data_received
+		code = e.code
+		if code == 500:
+			print('HTTP error code: ', code, ' Need to call login again')
+			login_fakebook(csrf_token,opener, username, password)
+		elif code == 403 or e.code == 404:
+			print("Abandoning search.")
 
-# TODO: Handle 301- redirect, try again with new url in location try 403: abandon search
-# and 500: retry until successful
+
 def get_all_friends_flags(url, opener):
 	global total_URL_not_found
 	parser = src.my_htmlparser.MyHTMLParser()
@@ -130,10 +135,14 @@ def get_all_friends_flags(url, opener):
 			page_list_set.add(page)
 		return get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set, set(),
 											parser)
-	except urllib.request.URLError:
-		# print('URL not found: ', url)
+	except urllib.request.HTTPError as e:
 		total_URL_not_found += 1
-		return [], []
+		code = e.code
+		if code == 500:
+			# print('HTTP error code: ', code, " Ping URL again.")
+			return get_all_friends_flags(url, opener)
+		elif code == 403 or e.code == 404:
+			print("Abandoning search.")
 
 
 def get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set, visited_page_set,
@@ -145,33 +154,44 @@ def get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set, 
 	for page in page_list_set:
 		if page not in visited_page_set:
 			url = page
-			page_list_set.remove(page)
-			visited_page_set.add(page)
 			break
 	# Base case
 	if url is None:
 		return friend_list, flag_list
 	try:
-		html_friends = opener.open(create_fb_absolute_url(url)).read().decode()
+		resp = opener.open(create_fb_absolute_url(url))
+		page_list_set.remove(url)
+		visited_page_set.add(url)
+		html_friends = resp.read().decode()
 		dict_ret = parse_flags_friends_page_list(html_friends, parser)
 		friend_list.extend(list(dict_ret['friends']))
 		flag_list.extend(list(dict_ret['flags']))
 		for el in dict_ret['page_list']:
 			page_list_set.add(el)
-	except urllib.request.URLError:
+	except urllib.request.HTTPError as e:
 		total_URL_not_found += 1
-		# print('URL not found: ', create_fb_absolute_url(url))
+		code = e.code
+		if code == 403 or code == 404:  # abandon search
+			print("Abandoning search of URL.")
+			page_list_set.remove(url)
+			visited_page_set.add(url)
+		elif code == 500:
+			pass
+			# print('HTTP error code: ', code, " Ping URL again.")
+		elif code == 301:
+			print("Should not see this. Python handles redirects automatically")
 	finally:
 		return get_all_friends_flags_helper(opener, friend_list, flag_list, page_list_set,
 											visited_page_set, parser)
 
 
-def process_url(url, opener, lock):
+def process_url(url, cj, lock):
 	global visited_set
 	global total_loop_count
 	global q_flags
 	with lock:
 		visited_set = visited_set.union((url,))
+	opener = create_custom_opener(cj)
 	friends_list, flags_list = get_all_friends_flags(create_fb_absolute_url(url), opener)
 	friends_list_no_dupes = list(filter(lambda x: x not in visited_set, friends_list))
 	potential_loop_count = len(friends_list) - len(friends_list_no_dupes)
@@ -182,7 +202,7 @@ def process_url(url, opener, lock):
 		q_frontier.put(friend)
 
 
-def worker(opener, lock):
+def worker(cj, lock):
 	print(threading.current_thread().getName(), 'Starting')
 	while True:
 		try:
@@ -190,20 +210,18 @@ def worker(opener, lock):
 			if url is None:
 				break
 			if url not in visited_set:
-				# print("Visiting Friend: ", url)
-				process_url(url, opener, lock)
-				# print("Finished visiting Friend ", url)
-		except:
-			print("Getting an item in frontier failed.")
+				process_url(url, cj, lock)
+		except queue.Empty as e:
+			print("We should not see this because Queue will block until an item is found.")
+			print(e)
 		finally:
 			q_frontier.task_done()
-			# print("Frontier count: ", q_frontier.qsize())
-			# print("Friend count: ", len(visited_set), '\n')
 
 
-def create_custom_opener():
-	return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(
-		http.cookiejar.CookieJar()))
+def create_custom_opener(cj):
+	opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+	opener.addheaders.append(("Connection", "keep-alive"))
+	return opener
 
 
 def add_flags_to_flag_queue(flags_iter, lock):
@@ -217,9 +235,9 @@ def add_friends_to_frontier(friends_iter):
 		q_frontier.put(friend)
 
 
-def setup_threads(threads, opener, lock):
+def setup_threads(threads, cj, lock):
 	for i in range(NUM_THREADS):
-		t = threading.Thread(target=worker, args=(opener, lock), name='Worker ' + str(i))
+		t = threading.Thread(target=worker, args=(cj, lock), name='Worker ' + str(i))
 		threads.append(t)
 		t.start()
 	scraper_feedback()
